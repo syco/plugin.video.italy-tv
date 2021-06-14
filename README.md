@@ -4,7 +4,7 @@
 A kodi plug-in that scrapes italian links from the web and populate a list understandable by kodi.
 
 ### Dependencies ###
-- [Twilight0 Repository](https://github.com/Twilight0/repo.twilight0) for streamlink support
+- [liveproxy](https://github.com/back-to/liveproxy) for streamlink support
 
 ### Help! ###
 If you think this piece of code has been useful to you and want to share some love, here's how:

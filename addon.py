@@ -1,5 +1,3 @@
-import streamlink
-#import streamlink.session
 import sys
 import xbmc
 import xbmcgui
@@ -9,6 +7,7 @@ import re
 import requests
 import urllib
 import urlparse
+import base64
 from bs4 import BeautifulSoup
 
 headers = {
@@ -74,19 +73,10 @@ def add_streamlink(link_title, link_strip):
   if (link_strip.startswith("//")):
     link_strip = "https:" + link_strip
 
-  #data = {
-  #    "action": "play",
-  #    "url" : link_strip,
-  #    "quality": "best",
-  #    "title": link_title,
-  #    "image": ""
-  #    }
-  #xbmcplugin.addDirectoryItem(handle=_handle, url='plugin://plugin.video.streamlink-tester/?{1}'.format(_pid, urllib.urlencode(data)), listitem=videoItem, isFolder=False)
-
   data = {
-      "action": "streamplay",
+      "action": "play",
       "title": link_title,
-      "link" : link_strip
+      "link" : "http://127.0.0.1:53422/base64/" + base64.urlsafe_b64encode("streamlink " + link_strip + " best").decode('utf-8')
       }
   xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.urlencode(data)), listitem=videoItem, isFolder=False)
 
@@ -102,7 +92,7 @@ def add_directlink(link_title, link_strip):
     link_strip = "https:" + link_strip
 
   data = {
-      "action": "directplay",
+      "action": "play",
       "title": link_title,
       "link" : link_strip
       }
@@ -133,15 +123,6 @@ def list_links(params):
       link_strip = iframe_in.get('src').strip()
       add_streamlink(link_title, link_strip)
 
-    #if html_in.find("https://www.janjuaplayer.com/resources/scripts/hjanjua.js") != -1:
-    #  channel = re.search("\ channel='(\w+)'", html_in)
-    #  gvar = re.search("\ g='(\w+)'", html_in)
-    #  if channel and gvar:
-    #    link_title = "Link {} | janj".format(c)
-    #    c += 1
-    #    link_strip = "https://www.janjua.tv/hembedplayer/{}/{}/1920/1080".format(channel.group(1), gvar.group(1))
-    #    add_streamlink(link_title, link_strip)
-
     videos_in = soup_in.find_all('video')
     for video_in in videos_in:
       link_title = "Link {} | video tag".format(c)
@@ -160,20 +141,7 @@ def list_links(params):
   xbmcplugin.endOfDirectory(_handle)
 
 
-def streamplay_video(params):
-  streams = streamlink.streams(params['link'][0])
-  xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=streams['best'].to_url()))
-  #try:
-  #  session = streamlink.session.Streamlink()
-  #  plugin = session.resolve_url(params['link'][0])
-  #  streams = plugin.get_streams()
-  #  xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=streams['best'].to_url()))
-  #except Exception as e:
-  #  xbmc.log("type error: " + str(e), xbmc.LOGERROR)
-  #  pass
-
-
-def directplay_video(params):
+def play_video(params):
   xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=params['link'][0]))
 
 
@@ -191,10 +159,8 @@ def router(paramstring):
   xbmc.log("params: {}".format(params), xbmc.LOGNOTICE)
 
   if params:
-    if params['action'][0] == 'directplay':
-      directplay_video(params)
-    elif params['action'][0] == 'streamplay':
-      streamplay_video(params)
+    if params['action'][0] == 'play':
+      play_video(params)
     elif params['action'][0] == 'scrape':
       list_links(params)
     else:
