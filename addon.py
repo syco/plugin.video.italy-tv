@@ -104,6 +104,9 @@ def add_directlink(link_title, link_strip):
 
 
 def add_links_rec(url_in):
+  if (url_in.startswith("//")):
+    url_in = "https:" + url_in
+
   if url_in not in parsed:
     parsed.append(url_in)
 
