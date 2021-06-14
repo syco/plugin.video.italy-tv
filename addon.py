@@ -114,9 +114,11 @@ def add_links_rec(url_in):
     iframes_in = soup_in.find_all('iframe')
     for iframe_in in iframes_in:
       link_strip = iframe_in.get('src').strip()
-      #link_title = "Link {} | streamlink".format(link_strip)
-      #add_streamlink(link_title, link_strip)
-      add_links_rec(link_strip)
+      if "mailocal2.xyz" in link_strip or "easysite.one" in link_strip or "open-live.org" in link_strip:
+        add_links_rec(link_strip)
+      else
+        link_title = "Link {} | streamlink".format(link_strip)
+        add_streamlink(link_title, link_strip)
 
     natives_in = re.findall("\/\/.*?Native.*?\.php", html_in)
     for native_in in natives_in:
