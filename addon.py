@@ -79,7 +79,7 @@ def add_streamlink(link_title, link_strip):
   data = {
       "action": "play",
       "title": link_title,
-      "link" : "http://127.0.0.1:53422/base64/" + base64.urlsafe_b64encode("streamlink " + link_strip + " best").decode('utf-8')
+      "link" : "http://127.0.0.1:53422/base64/" + base64.urlsafe_b64encode("streamlink " + link_strip + " best").decode('utf-8') + "/"
       }
   xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.urlencode(data)), listitem=videoItem, isFolder=False)
 
