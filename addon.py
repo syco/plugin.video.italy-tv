@@ -116,29 +116,41 @@ def add_links_rec(url_in):
 
     iframes_in = soup_in.find_all('iframe')
     for iframe_in in iframes_in:
-      link_strip = iframe_in.get('src').strip()
-      if "mailocal2.xyz" in link_strip or "easysite.one" in link_strip or "open-live.org" in link_strip:
-        add_links_rec(link_strip)
-      else:
-        link_title = "Link {} | streamlink".format(link_strip)
-        add_streamlink(link_title, link_strip)
+      try:
+        link_strip = iframe_in.get('src').strip()
+        if "mailocal2.xyz" in link_strip or "easysite.one" in link_strip or "open-live.org" in link_strip:
+          add_links_rec(link_strip)
+        else:
+          link_title = "Link {} | streamlink".format(link_strip)
+          add_streamlink(link_title, link_strip)
+      except Exception as e:
+        xbmc.log("type error: " + str(e), xbmc.LOGERROR)
 
     natives_in = re.findall("\/\/.*?Native.*?\.php", html_in)
     for native_in in natives_in:
-      link_strip = native_in.strip()
-      add_links_rec(link_strip)
+      try:
+        link_strip = native_in.strip()
+        add_links_rec(link_strip)
+      except Exception as e:
+        xbmc.log("type error: " + str(e), xbmc.LOGERROR)
 
     videos_in = soup_in.find_all('video')
     for video_in in videos_in:
-      link_strip = video_in.get('src').strip()
-      link_title = "Link {} | video tag".format(link_strip)
-      add_streamlink(link_title, link_strip)
+      try:
+        link_strip = video_in.get('src').strip()
+        link_title = "Link {} | video tag".format(link_strip)
+        add_streamlink(link_title, link_strip)
+      except Exception as e:
+        xbmc.log("type error: " + str(e), xbmc.LOGERROR)
 
     m3u8s_list = re.findall("\/\/.*?\.m3u8", html_in)
     for m3u8 in m3u8s_list:
-      link_strip = m3u8.strip()
-      link_title = "Link {} | m3u8".format(link_strip)
-      add_directlink(link_title, link_strip)
+      try:
+        link_strip = m3u8.strip()
+        link_title = "Link {} | m3u8".format(link_strip)
+        add_directlink(link_title, link_strip)
+      except Exception as e:
+        xbmc.log("type error: " + str(e), xbmc.LOGERROR)
 
 
 def list_links(params):
