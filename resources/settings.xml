@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<settings>
+  <category label="Liveproxy">
+    <setting label="Enabled" type="bool" id="liveproxy_enabled" default="true"/>
+    <setting label="Host" type="text" id="liveproxy_host" enable="eq(-1,True)" default="127.0.0.1"/>
+    <setting label="Port" type="number" id="liveproxy_port" enable="eq(-2,True)" default="53422"/>
+  </category>
+</settings>

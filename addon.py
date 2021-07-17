@@ -20,6 +20,9 @@ addon = xbmcaddon.Addon()
 _pid = sys.argv[0]
 _handle = int(sys.argv[1])
 
+liveproxy_enabled = addon.getSettingBool('liveproxy_enabled')
+liveproxy_host = addon.getSetting('liveproxy_host')
+liveproxy_port = addon.getSetting('liveproxy_port')
 
 parsed = []
 
@@ -76,14 +79,15 @@ def add_streamlink(link_title, link_strip):
   if (link_strip.startswith("//")):
     link_strip = "https:" + link_strip
 
-  data = {
-      "action": "play",
-      "title": link_title,
-      "link" : "http://127.0.0.1:53422/base64/" + base64.urlsafe_b64encode("streamlink " + link_strip + " best").decode('utf-8') + "/"
-      }
-  xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.urlencode(data)), listitem=videoItem, isFolder=False)
+  if (liveproxy_enabled):
+    data = {
+        "action": "play",
+        "title": link_title,
+        "link" : "http://" + liveproxy_host + ":" + liveproxy_port + "/base64/" + base64.urlsafe_b64encode("streamlink " + link_strip + " best").decode('utf-8') + "/"
+        }
+    xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.urlencode(data)), listitem=videoItem, isFolder=False)
 
-  xbmc.log("stream: {}".format(link_strip), xbmc.LOGNOTICE)
+    xbmc.log("stream: {}".format(link_strip), xbmc.LOGNOTICE)
 
 
 def add_directlink(link_title, link_strip):
