@@ -71,9 +71,9 @@ def list_channels():
 
 
 
-def add_streamlink(link_title, link_strip):
-  videoItem = xbmcgui.ListItem(link_title)
-  videoItem.setInfo('video', {'title': link_title, 'mediatype': 'video'})
+def add_streamlink(link_strip):
+  videoItem = xbmcgui.ListItem(link_strip)
+  videoItem.setInfo('video', {'title': link_strip, 'mediatype': 'video'})
   videoItem.setProperty('IsPlayable', 'true')
 
   if (link_strip.startswith("//")):
@@ -82,7 +82,7 @@ def add_streamlink(link_title, link_strip):
   if (liveproxy_enabled):
     data = {
         "action": "play",
-        "title": link_title,
+        "title": link_strip,
         "link" : "http://" + liveproxy_host + ":" + liveproxy_port + "/base64/" + base64.urlsafe_b64encode("streamlink " + link_strip + " best").decode('utf-8') + "/"
         }
     xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.urlencode(data)), listitem=videoItem, isFolder=False)
@@ -90,9 +90,9 @@ def add_streamlink(link_title, link_strip):
     xbmc.log("stream: {}".format(link_strip), xbmc.LOGNOTICE)
 
 
-def add_directlink(link_title, link_strip):
-  videoItem = xbmcgui.ListItem(link_title)
-  videoItem.setInfo('video', {'title': link_title, 'mediatype': 'video'})
+def add_directlink(link_strip):
+  videoItem = xbmcgui.ListItem(link_strip)
+  videoItem.setInfo('video', {'title': link_strip, 'mediatype': 'video'})
   videoItem.setProperty('IsPlayable', 'true')
 
   if (link_strip.startswith("//")):
@@ -100,7 +100,7 @@ def add_directlink(link_title, link_strip):
 
   data = {
       "action": "play",
-      "title": link_title,
+      "title": link_strip,
       "link" : link_strip
       }
   xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.urlencode(data)), listitem=videoItem, isFolder=False)
@@ -125,8 +125,7 @@ def add_links_rec(url_in):
         if "mailocal2.xyz" in link_strip or "easysite.one" in link_strip or "open-live.org" in link_strip:
           add_links_rec(link_strip)
         else:
-          link_title = "Link {} | streamlink".format(link_strip)
-          add_streamlink(link_title, link_strip)
+          add_streamlink(link_strip)
       except Exception as e:
         xbmc.log("type error: " + str(e), xbmc.LOGERROR)
 
@@ -142,8 +141,7 @@ def add_links_rec(url_in):
     for video_in in videos_in:
       try:
         link_strip = video_in.get('src').strip()
-        link_title = "Link {} | video tag".format(link_strip)
-        add_streamlink(link_title, link_strip)
+        add_streamlink(link_strip)
       except Exception as e:
         xbmc.log("type error: " + str(e), xbmc.LOGERROR)
 
@@ -151,8 +149,8 @@ def add_links_rec(url_in):
     for m3u8 in m3u8s_list:
       try:
         link_strip = m3u8.strip()
-        link_title = "Link {} | m3u8".format(link_strip)
-        add_directlink(link_title, link_strip)
+        #add_directlink(link_strip)
+        add_streamlink(link_strip)
       except Exception as e:
         xbmc.log("type error: " + str(e), xbmc.LOGERROR)
 
