@@ -38,7 +38,7 @@ def list_channels():
 
   for channels_col in channels_cols:
     header = channels_col.find('a', ['menu-link', 'sub-menu-link'])
-    header_title = "[COLOR red][B][UPPERCASE]{}[/UPPERCASE][/B][/COLOR]".format(header.getText().strip())
+    header_title = "[COLOR red][B][UPPERCASE]{0}[/UPPERCASE][/B][/COLOR]".format(header.getText().strip())
 
     if header_title not in parsed:
       parsed.append(header_title)
@@ -64,7 +64,7 @@ def list_channels():
             "link" : link.get('href')
             }
         xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.parse.urlencode(data)), listitem=videoItem, isFolder=True)
-        xbmc.log("{}: {}".format(link_title, link.get('href')), xbmc.LOGINFO)
+        xbmc.log("{0}: {1}".format(link_title, link.get('href')), xbmc.LOGINFO)
 
       xbmc.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^", xbmc.LOGINFO)
 
@@ -73,29 +73,18 @@ def list_channels():
 
 
 
-def add_streamlink(link_strip):
-  videoItem = xbmcgui.ListItem(link_strip)
-  videoItem.setInfo('video', {'title': link_strip, 'mediatype': 'video'})
-  videoItem.setProperty('IsPlayable', 'true')
-
+def add_streamlink(link_title, link_strip):
   if (link_strip.startswith("//")):
     link_strip = "https:" + link_strip
 
   if (liveproxy_enabled):
     newlink = str.encode("streamlink " + link_strip + " best")
-    data = {
-        "action": "play",
-        "title": link_strip,
-        "link" : "http://" + liveproxy_host + ":" + liveproxy_port + "/base64/" + base64.urlsafe_b64encode(newlink).decode('utf-8') + "/"
-        }
-    xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.parse.urlencode(data)), listitem=videoItem, isFolder=False)
-
-    xbmc.log("stream: {}".format(link_strip), xbmc.LOGINFO)
+    add_directlink(link_title, "http://" + liveproxy_host + ":" + liveproxy_port + "/base64/" + base64.urlsafe_b64encode(newlink).decode('utf-8') + "/")
 
 
-def add_directlink(link_strip):
-  videoItem = xbmcgui.ListItem(link_strip)
-  videoItem.setInfo('video', {'title': link_strip, 'mediatype': 'video'})
+def add_directlink(link_title, link_strip):
+  videoItem = xbmcgui.ListItem(link_title)
+  videoItem.setInfo('video', {'title': link_title, 'mediatype': 'video'})
   videoItem.setProperty('IsPlayable', 'true')
 
   if (link_strip.startswith("//")):
@@ -103,11 +92,11 @@ def add_directlink(link_strip):
 
   data = {
       "action": "play",
-      "title": link_strip,
+      "title": link_title,
       "link" : link_strip
       }
   xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.parse.urlencode(data)), listitem=videoItem, isFolder=False)
-  xbmc.log("direct: {}".format(link_strip), xbmc.LOGINFO)
+  xbmc.log("{0}: {1}".format(link_title, link_strip), xbmc.LOGINFO)
 
 
 def add_links_rec(url_in, loop):
@@ -131,7 +120,7 @@ def add_links_rec(url_in, loop):
         if "mailocal2.xyz" in link_strip or "easysite.one" in link_strip or "open-live.org" in link_strip:
           add_links_rec(link_strip, loop + 1)
         else:
-          add_streamlink(link_strip)
+          add_streamlink("iframe " + link_strip, link_strip)
       except Exception as e:
         xbmc.log("type error: " + str(e), xbmc.LOGERROR)
 
@@ -145,13 +134,27 @@ def add_links_rec(url_in, loop):
 
     videos_in = soup_in.find_all('video')
     for link_strip in videos_in:
-      add_streamlink(link_strip)
+      add_streamlink("video " + link_strip, link_strip)
 
-    xbmc.log("CHECK FOR m3u8", xbmc.LOGERROR)
     m3u8s_list = re.findall(r'https?:\/\/.*?\.m3u8', html_in)
     for link_strip in m3u8s_list:
-      #add_directlink(link_strip)
-      add_streamlink(link_strip)
+      add_directlink("m3u8", link_strip)
+
+    j_channel_re = re.search(r'channel=\'[^\']+', html_in)
+    j_g_re = re.search(r'g=\'[^\']+', html_in)
+    if j_channel_re and j_g_re:
+      j_channel = j_channel_re.group().split('\'')[1]
+      j_g = j_g_re.group().split('\'')[1]
+      if j_channel and j_g:
+        janjua_doc = requests.get("https://www.janjua.tv/hembedplayer/{0}/{1}/1920/1080".format(j_channel, j_g), headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0', 'Referer': 'https://www.janjua.tv/'}).text
+        janjua_video_re = re.search(r'enableVideo\("[^"]+', janjua_doc)
+        if janjua_video_re:
+          janjua_video = janjua_video_re.group().split('"')[1]
+          if janjua_video:
+            loadbalancer_doc = requests.get("https://www.tvportremote.com/loadbalancer").text
+            loadbalancer = loadbalancer_doc.split('=')[1]
+            if loadbalancer:
+              add_directlink("janjua", "https://{0}:8088/live/{1}/playlist.m3u8?id=1&pk={2}".format(loadbalancer, j_channel, janjua_video))
 
 
 def list_links(params):
@@ -173,13 +176,13 @@ xbmc.log(" ".join(sys.argv), xbmc.LOGINFO)
 
 def router(paramstring):
   try:
-    xbmc.log("paramstring: {}".format(paramstring), xbmc.LOGINFO)
+    xbmc.log("paramstring: {0}".format(paramstring), xbmc.LOGINFO)
     params = urllib.parse.parse_qs(paramstring)
   except Exception as e:
     xbmc.log("type error: " + str(e), xbmc.LOGERROR)
     params = False
 
-  xbmc.log("params: {}".format(params), xbmc.LOGINFO)
+  xbmc.log("params: {0}".format(params), xbmc.LOGINFO)
 
   if params:
     if params['action'][0] == 'play':
