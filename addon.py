@@ -75,6 +75,10 @@ def list_channels():
 
 
 def add_streamlink(link_title, link_strip):
+  videoItem = xbmcgui.ListItem(link_title)
+  videoItem.setInfo('video', {'title': link_title, 'mediatype': 'video'})
+  videoItem.setProperty('IsPlayable', 'true')
+
   if (link_strip.startswith("//")):
     link_strip = "https:" + link_strip
 
