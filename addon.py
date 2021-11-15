@@ -1,3 +1,4 @@
+import streamlink
 import sys
 import xbmc
 import xbmcgui
@@ -77,9 +78,13 @@ def add_streamlink(link_title, link_strip):
   if (link_strip.startswith("//")):
     link_strip = "https:" + link_strip
 
-  if (liveproxy_enabled):
-    newlink = str.encode("streamlink " + link_strip + " best")
-    add_directlink(link_title, "http://" + liveproxy_host + ":" + liveproxy_port + "/base64/" + base64.urlsafe_b64encode(newlink).decode('utf-8') + "/")
+  data = {
+      "action": "play_streamlink",
+      "title": link_title,
+      "link" : link_strip
+      }
+  xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.parse.urlencode(data)), listitem=videoItem, isFolder=False)
+  xbmc.log("{0}: {1}".format(link_title, link_strip), xbmc.LOGINFO)
 
 
 def add_directlink(link_title, link_strip):
@@ -91,7 +96,7 @@ def add_directlink(link_title, link_strip):
     link_strip = "https:" + link_strip
 
   data = {
-      "action": "play",
+      "action": "play_directlink",
       "title": link_title,
       "link" : link_strip
       }
@@ -167,8 +172,21 @@ def list_links(params):
   xbmcplugin.endOfDirectory(_handle)
 
 
-def play_video(params):
+def play_directlink(params):
   xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=params['link'][0]))
+
+
+def play_streamlink(params):
+  streams = streamlink.streams(params['link'][0])
+  xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=streams['best'].to_url()))
+  #try:
+  #  session = streamlink.session.Streamlink()
+  #  plugin = session.resolve_url(params['link'][0])
+  #  streams = plugin.get_streams()
+  #  xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=streams['best'].to_url()))
+  #except Exception as e:
+  #  xbmc.log("type error: " + str(e), xbmc.LOGERROR)
+  #  pass
 
 
 xbmc.log(" ".join(sys.argv), xbmc.LOGINFO)
@@ -185,8 +203,10 @@ def router(paramstring):
   xbmc.log("params: {0}".format(params), xbmc.LOGINFO)
 
   if params:
-    if params['action'][0] == 'play':
-      play_video(params)
+    if params['action'][0] == 'play_directlink':
+      play_directlink(params)
+    elif params['action'][0] == 'play_streamlink':
+      play_streamlink(params)
     elif params['action'][0] == 'scrape':
       list_links(params)
     else:
