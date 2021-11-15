@@ -76,7 +76,7 @@ def list_channels():
 
 def add_streamlink(link_title, link_strip):
   videoItem = xbmcgui.ListItem(link_title)
-  videoItem.setInfo('video', {'title': link_title, 'mediatype': 'video'})
+  videoItem.setInfo('video', {'title': "streamlink " + link_title, 'mediatype': 'video'})
   videoItem.setProperty('IsPlayable', 'true')
 
   if (link_strip.startswith("//")):
@@ -84,11 +84,15 @@ def add_streamlink(link_title, link_strip):
 
   data = {
       "action": "play_streamlink",
-      "title": link_title,
+      "title": "streamlink " + link_title,
       "link" : link_strip
       }
   xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.parse.urlencode(data)), listitem=videoItem, isFolder=False)
-  xbmc.log("{0}: {1}".format(link_title, link_strip), xbmc.LOGINFO)
+  xbmc.log("{0}: {1}".format("streamlink " + link_title, link_strip), xbmc.LOGINFO)
+
+  if (liveproxy_enabled):
+    newlink = str.encode("streamlink " + link_strip + " best")
+    add_directlink("liveproxy " + link_title, "http://" + liveproxy_host + ":" + liveproxy_port + "/base64/" + base64.urlsafe_b64encode(newlink).decode('utf-8') + "/")
 
 
 def add_directlink(link_title, link_strip):
