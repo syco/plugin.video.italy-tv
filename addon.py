@@ -35,8 +35,9 @@ def list_channels():
   #xbmc.log(html_doc, xbmc.LOGINFO)
   soup = BeautifulSoup(html_doc, 'html.parser')
 
-  channels_cols = soup.find_all('li', ['menu-item-depth-1'])
+  channels_grid = soup.find_all('ul', ['dropdown-menu menu-depth-1'])[1]
 
+  channels_cols = channels_grid.find_all('li', ['menu-item-depth-1'])
   for channels_col in channels_cols:
     header = channels_col.find('a', ['menu-link', 'sub-menu-link'])
     header_title = "[COLOR red][B][UPPERCASE]{0}[/UPPERCASE][/B][/COLOR]".format(header.getText().strip())
@@ -122,8 +123,9 @@ def add_links_rec(url_in, loop):
   if url_in not in parsed:
     parsed.append(url_in)
 
-    html_in = requests.get(url_in, headers=headers).text
-    xbmc.log(html_in, xbmc.LOGINFO)
+    #html_in = requests.get(url_in, headers=headers).text
+    html_in = re.sub(r'<!--(.*?)-->', '', requests.get(url_in, headers=headers).text)
+    #xbmc.log(html_in, xbmc.LOGINFO)
     soup_in = BeautifulSoup(html_in, 'html.parser')
 
     iframes_in = soup_in.find_all('iframe')
@@ -151,7 +153,7 @@ def add_links_rec(url_in, loop):
 
     m3u8s_list = re.findall(r'https?:\/\/.*?\.m3u8', html_in)
     for link_strip in m3u8s_list:
-      add_directlink("m3u8", link_strip)
+      add_directlink("m3u8 " + link_strip, link_strip)
 
     j_channel_re = re.search(r'channel=\'[^\']+', html_in)
     j_g_re = re.search(r'g=\'[^\']+', html_in)
