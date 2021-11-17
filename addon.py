@@ -76,8 +76,10 @@ def play_streamlink(params):
 def play_wigistream(params):
   stream = wigistream.extract_link(params['link'][0])
   if stream:
+    xbmc.log(stream, xbmc.LOGINFO)
     #xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=stream))
     streams = streamlink.streams(stream)
+    xbmc.log(streams['best'].to_url(), xbmc.LOGINFO)
     xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=streams['best'].to_url()))
 
 
