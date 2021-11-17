@@ -18,6 +18,7 @@ def extract_link(link0):
           wigi11 = wigi1_re.group().split('|')
           wigia = wigi11[3]
           wigib = wigi11[1]
-          return "https://{0}.{1}.net:8443/hls/{2}.m3u8?s={3}&e={4}".format(wigia, wigib, wigiid, wigis, wigie)
+
+          return "https://{0}.{1}.net:8443/hls/{2}.m3u8?s={3}&e={4}|User-Agent={5}&Referer={6}".format(wigia, wigib, wigiid, wigis, wigie, urllib.parse.urlencode('Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0'), urllib.parse.urlencode("https://wigistream.to/embed/{0}".format(wigiid)))
   return None
 
