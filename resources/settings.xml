@@ -5,4 +5,8 @@
     <setting label="Host" type="text" id="liveproxy_host" enable="eq(-1,True)" default="127.0.0.1"/>
     <setting label="Port" type="number" id="liveproxy_port" enable="eq(-2,True)" default="53422"/>
   </category>
+  <category label="SportLive">
+    <setting label="Enabled" type="bool" id="sportlive_enabled" default="false"/>
+    <setting label="Password" type="number" id="sportlive_pass" enable="eq(-1,True)" default=""/>
+  </category>
 </settings>

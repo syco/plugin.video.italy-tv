@@ -20,9 +20,8 @@ headers = {
 
 parsed = []
 
-
 def list_channels():
-  xbmcplugin.setPluginCategory(_handle, 'Italy TV')
+  xbmcplugin.setPluginCategory(_handle, 'LiveHereOne')
   xbmcplugin.setContent(_handle, 'videos')
 
   html_doc = requests.get("https://www.livehere.one/", headers=headers).text
@@ -55,7 +54,7 @@ def list_channels():
         videoItem = xbmcgui.ListItem(link_title)
         videoItem.setInfo('video', {'title': link_title, 'mediatype': 'video'})
         data = {
-            "action": "scrape",
+            "action": "scrape_livehere_links",
             "title": link_title,
             "link" : link.get('href')
             }
@@ -66,8 +65,6 @@ def list_channels():
 
   xbmcplugin.addSortMethod(_handle, xbmcplugin.SORT_METHOD_NONE)
   xbmcplugin.endOfDirectory(_handle)
-
-
 
 def add_links_rec(url_in, loop):
   if (loop > 3):
@@ -120,7 +117,6 @@ def add_links_rec(url_in, loop):
         link_janjua = janjua.extract_link(j_channel, j_g)
         if link_janjua:
           add_directlink("janjua", link_janjua)
-
 
 def list_links(params):
   xbmcplugin.setPluginCategory(_handle, 'Italy TV')
