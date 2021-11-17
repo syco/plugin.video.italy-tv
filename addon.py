@@ -11,6 +11,8 @@ from bs4 import BeautifulSoup
 _pid = sys.argv[0]
 _handle = int(sys.argv[1])
 
+import fn_wigistream as wigistream
+
 import lib_livehereone as lh1
 import lib_sportlive as sl1
 
@@ -71,6 +73,14 @@ def play_streamlink(params):
   xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=streams['best'].to_url()))
 
 
+def play_wigistream(params):
+  stream = wigistream.extract_link(params['link'][0])
+  if stream:
+    #xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=stream))
+    streams = streamlink.streams(stream)
+    xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=streams['best'].to_url()))
+
+
 def print_main_menu():
   xbmcplugin.setPluginCategory(_handle, 'Italy TV')
   xbmcplugin.setContent(_handle, 'videos')
@@ -113,6 +123,8 @@ def router(paramstring):
       play_directlink(params)
     elif params['action'][0] == 'play_streamlink':
       play_streamlink(params)
+    elif params['action'][0] == 'play_wigistream':
+      play_wigistream(params)
     elif params['action'][0] == 'scrape_livehere_channels':
       lh1.list_channels()
     elif params['action'][0] == 'scrape_livehere_links':

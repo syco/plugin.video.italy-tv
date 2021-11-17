@@ -6,11 +6,6 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-from addon import _pid
-from addon import _handle
-from addon import add_directlink
-from addon import add_streamlink
-
 import fn_janjua as janjua
 
 headers = {
@@ -21,6 +16,9 @@ headers = {
 parsed = []
 
 def list_channels():
+  from addon import _pid
+  from addon import _handle
+
   xbmcplugin.setPluginCategory(_handle, 'LiveHereOne')
   xbmcplugin.setContent(_handle, 'videos')
 
@@ -67,6 +65,9 @@ def list_channels():
   xbmcplugin.endOfDirectory(_handle)
 
 def add_links_rec(url_in, loop):
+  from addon import add_directlink
+  from addon import add_streamlink
+
   if (loop > 3):
     return
 
@@ -119,6 +120,8 @@ def add_links_rec(url_in, loop):
           add_directlink("janjua", link_janjua)
 
 def list_links(params):
+  from addon import _handle
+
   xbmcplugin.setPluginCategory(_handle, 'Italy TV')
   xbmcplugin.setContent(_handle, 'videos')
 
