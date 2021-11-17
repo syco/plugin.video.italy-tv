@@ -11,10 +11,11 @@ from bs4 import BeautifulSoup
 _pid = sys.argv[0]
 _handle = int(sys.argv[1])
 
+import fn_janjua as janjua
 import fn_wigistream as wigistream
 
-import lib_livehereone as lh1
-import lib_sportlive as sl1
+import lib_livehereone as livehereone
+import lib_sportlive as sportlive
 
 addon = xbmcaddon.Addon()
 
@@ -25,43 +26,22 @@ liveproxy_port = addon.getSetting('liveproxy_port')
 sportlive_enabled = addon.getSettingBool('sportlive_enabled')
 sportlive_pass = addon.getSetting('sportlive_pass')
 
+def add_directory_menu(data, _isPlayable, _isFolder):
+  if ('link' in data and data['link'].startswith("//")):
+    data['link'] = "https:" + data['link']
 
-def add_streamlink(link_title, link_strip):
-  videoItem = xbmcgui.ListItem(link_title)
-  videoItem.setInfo('video', {'title': "streamlink " + link_title, 'mediatype': 'video'})
-  videoItem.setProperty('IsPlayable', 'true')
-
-  if (link_strip.startswith("//")):
-    link_strip = "https:" + link_strip
-
-  data = {
-      "action": "play_streamlink",
-      "title": "streamlink " + link_title,
-      "link" : link_strip
-      }
-  xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.parse.urlencode(data)), listitem=videoItem, isFolder=False)
-  xbmc.log("{0}: {1}".format("streamlink " + link_title, link_strip), xbmc.LOGINFO)
-
-  if (liveproxy_enabled):
-    newlink = str.encode("streamlink " + link_strip + " best")
-    add_directlink("liveproxy " + link_title, "http://" + liveproxy_host + ":" + liveproxy_port + "/base64/" + base64.urlsafe_b64encode(newlink).decode('utf-8') + "/")
+  videoItem = xbmcgui.ListItem(data['title'])
+  videoItem.setInfo('video', {'title': data['title'], 'mediatype': 'video'})
+  videoItem.setProperty('IsPlayable', _isPlayable)
+  xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.parse.urlencode(data)), listitem=videoItem, isFolder=_isFolder)
+  xbmc.log(" ".join(data), xbmc.LOGINFO)
 
 
-def add_directlink(link_title, link_strip):
-  videoItem = xbmcgui.ListItem(link_title)
-  videoItem.setInfo('video', {'title': link_title, 'mediatype': 'video'})
-  videoItem.setProperty('IsPlayable', 'true')
-
-  if (link_strip.startswith("//")):
-    link_strip = "https:" + link_strip
-
-  data = {
-      "action": "play_directlink",
-      "title": link_title,
-      "link" : link_strip
-      }
-  xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.parse.urlencode(data)), listitem=videoItem, isFolder=False)
-  xbmc.log("{0}: {1}".format(link_title, link_strip), xbmc.LOGINFO)
+#def add_streamlink(link_title, link_strip):
+#  add_directory_menu({"action": "play_streamlink", "title": "streamlink " + link_title, "link": link_strip}, 'true', False)
+#  if (liveproxy_enabled):
+#    newlink = str.encode("streamlink " + link_strip + " best")
+#    add_directory_menu({"action": "play_directlink", "title": "liveproxy " + link_title, "link": "http://" + liveproxy_host + ":" + liveproxy_port + "/base64/" + base64.urlsafe_b64encode(newlink).decode('utf-8') + "/"}, 'true', False)
 
 
 def play_directlink(params):
@@ -73,36 +53,28 @@ def play_streamlink(params):
   xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=streams['best'].to_url()))
 
 
+def play_janjua(params):
+  stream = janjua.extract_link(params['link0'][0], params['link1'][0])
+  xbmc.log("{0}".format(stream), xbmc.LOGINFO)
+  if stream:
+    xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=stream))
+
+
 def play_wigistream(params):
   stream = wigistream.extract_link(params['link'][0])
+  xbmc.log("{0}".format(stream), xbmc.LOGINFO)
   if stream:
-    xbmc.log(stream, xbmc.LOGINFO)
     xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=stream))
-    #streams = streamlink.streams(stream)
-    #xbmc.log(streams['best'].to_url(), xbmc.LOGINFO)
-    #xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=streams['best'].to_url()))
 
 
 def print_main_menu():
   xbmcplugin.setPluginCategory(_handle, 'Italy TV')
   xbmcplugin.setContent(_handle, 'videos')
 
-  videoItem = xbmcgui.ListItem("LiveHereOne")
-  videoItem.setInfo('video', {'title': "LiveHereOne", 'mediatype': 'video'})
-  data = {
-      "action": "scrape_livehere_channels",
-      "title": "LiveHereOne"
-      }
-  xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.parse.urlencode(data)), listitem=videoItem, isFolder=True)
+  add_directory_menu({"action": "scrape_livehere_channels", "title": "LiveHereOne"}, 'false', True)
 
   if (sportlive_enabled):
-    videoItem = xbmcgui.ListItem("SportLive")
-    videoItem.setInfo('video', {'title': "SportLive", 'mediatype': 'video'})
-    data = {
-        "action": "scrape_sportlive_channels",
-        "title": "SportLive"
-        }
-    xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.parse.urlencode(data)), listitem=videoItem, isFolder=True)
+    add_directory_menu({"action": "scrape_sportlive_channels", "title": "SportLive"}, 'false', True)
 
   xbmcplugin.endOfDirectory(_handle)
 
@@ -125,14 +97,16 @@ def router(paramstring):
       play_directlink(params)
     elif params['action'][0] == 'play_streamlink':
       play_streamlink(params)
+    elif params['action'][0] == 'play_janjua':
+      play_janjua(params)
     elif params['action'][0] == 'play_wigistream':
       play_wigistream(params)
     elif params['action'][0] == 'scrape_livehere_channels':
-      lh1.list_channels()
+      livehereone.list_channels()
     elif params['action'][0] == 'scrape_livehere_links':
-      lh1.list_links(params)
+      livehereone.list_links(params)
     elif params['action'][0] == 'scrape_sportlive_channels':
-      sl1.list_channels(sportlive_pass)
+      sportlive.list_channels(sportlive_pass)
     else:
       print_main_menu()
   else:

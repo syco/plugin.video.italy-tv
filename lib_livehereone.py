@@ -3,13 +3,12 @@ import xbmcgui
 import xbmcplugin
 import re
 import requests
-import urllib
 from bs4 import BeautifulSoup
 
-import fn_janjua as janjua
+FFUA = 'Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0'
 
 headers = {
-    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0',
+    'User-Agent': FFUA,
     'Referer': 'https://easysite.one/'
     }
 
@@ -18,6 +17,7 @@ parsed = []
 def list_channels():
   from addon import _pid
   from addon import _handle
+  from addon import add_directory_menu
 
   xbmcplugin.setPluginCategory(_handle, 'LiveHereOne')
   xbmcplugin.setContent(_handle, 'videos')
@@ -36,37 +36,21 @@ def list_channels():
     if header_title not in parsed:
       parsed.append(header_title)
 
-      headerItem = xbmcgui.ListItem(header_title)
-      headerItem.setInfo('video', {'title': header_title, 'mediatype': 'video'})
-      headerItem.setProperty('IsPlayable', 'false')
-      xbmcplugin.addDirectoryItem(handle=_handle, url="", listitem=headerItem, isFolder=False)
-
-      xbmc.log("---------------------------", xbmc.LOGINFO)
-      xbmc.log(header_title, xbmc.LOGINFO)
+      add_directory_menu({"action": "", "title": header_title}, 'false', False)
 
       channels_list = channels_col.find_all('li', ['menu-item-depth-2'])
       for channel in channels_list:
         link = channel.find('a')
         link_title = link.getText().strip()
-
-        videoItem = xbmcgui.ListItem(link_title)
-        videoItem.setInfo('video', {'title': link_title, 'mediatype': 'video'})
-        data = {
-            "action": "scrape_livehere_links",
-            "title": link_title,
-            "link" : link.get('href')
-            }
-        xbmcplugin.addDirectoryItem(handle=_handle, url='{0}?{1}'.format(_pid, urllib.parse.urlencode(data)), listitem=videoItem, isFolder=True)
-        xbmc.log("{0}: {1}".format(link_title, link.get('href')), xbmc.LOGINFO)
-
-      xbmc.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^", xbmc.LOGINFO)
+        add_directory_menu({"action": "scrape_livehere_links", "title": link_title, "link": link.get('href')}, 'false', True)
 
   xbmcplugin.addSortMethod(_handle, xbmcplugin.SORT_METHOD_NONE)
   xbmcplugin.endOfDirectory(_handle)
 
 def add_links_rec(url_in, loop):
-  from addon import add_directlink
-  from addon import add_streamlink
+  from addon import _pid
+  from addon import _handle
+  from addon import add_directory_menu
 
   if (loop > 3):
     return
@@ -89,7 +73,7 @@ def add_links_rec(url_in, loop):
         if "mailocal2.xyz" in link_strip or "easysite.one" in link_strip or "open-live.org" in link_strip:
           add_links_rec(link_strip, loop + 1)
         else:
-          add_streamlink("iframe " + link_strip, link_strip)
+          add_directory_menu({"action": "play_streamlink", "title": "iframe " + link_strip, "link": link_strip}, 'true', False)
       except Exception as e:
         xbmc.log("type error: " + str(e), xbmc.LOGERROR)
 
@@ -103,11 +87,11 @@ def add_links_rec(url_in, loop):
 
     videos_in = soup_in.find_all('video')
     for link_strip in videos_in:
-      add_streamlink("video " + link_strip, link_strip)
+      add_directory_menu({"action": "play_streamlink", "title": "video " + link_strip, "link": link_strip}, 'true', False)
 
     m3u8s_list = re.findall(r'https?:\/\/.*?\.m3u8', html_in)
     for link_strip in m3u8s_list:
-      add_directlink("m3u8 " + link_strip, link_strip)
+      add_directory_menu({"action": "play_directlink", "title": "m3u8 " + link_strip, "link": link_strip}, 'true', False)
 
     j_channel_re = re.search(r'channel=\'[^\']+', html_in)
     j_g_re = re.search(r'g=\'[^\']+', html_in)
@@ -115,9 +99,7 @@ def add_links_rec(url_in, loop):
       j_channel = j_channel_re.group().split('\'')[1]
       j_g = j_g_re.group().split('\'')[1]
       if j_channel and j_g:
-        link_janjua = janjua.extract_link(j_channel, j_g)
-        if link_janjua:
-          add_directlink("janjua", link_janjua)
+        add_directory_menu({"action": "play_janjua", "title": "janjua " + j_channel, "link0": j_channel, "link1": j_g}, 'true', False)
 
 def list_links(params):
   from addon import _handle
