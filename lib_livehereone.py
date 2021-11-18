@@ -22,27 +22,21 @@ def list_channels():
   xbmcplugin.setPluginCategory(_handle, 'LiveHereOne')
   xbmcplugin.setContent(_handle, 'videos')
 
-  html_doc = requests.get("https://www.livehere.one/", headers=headers).text
+  html_doc = requests.get("https://mailocal2.xyz/lv/tv-italia-diretta-streaming-senza-vpn-estero/", headers=headers).text
   #xbmc.log(html_doc, xbmc.LOGINFO)
   soup = BeautifulSoup(html_doc, 'html.parser')
 
-  channels_grid = soup.find_all('ul', ['dropdown-menu menu-depth-1'])[1]
-
-  channels_cols = channels_grid.find_all('li', ['menu-item-depth-1'])
+  channels_cols = soup.find_all('div', ['wp-block-column'])
   for channels_col in channels_cols:
-    header = channels_col.find('a', ['menu-link', 'sub-menu-link'])
+    header = channels_col.find('h3')
     header_title = "[COLOR red][B][UPPERCASE]{0}[/UPPERCASE][/B][/COLOR]".format(header.getText().strip())
 
-    if header_title not in parsed:
-      parsed.append(header_title)
+    add_directory_menu({"action": "", "title": header_title}, 'false', False)
 
-      add_directory_menu({"action": "", "title": header_title}, 'false', False)
-
-      channels_list = channels_col.find_all('li', ['menu-item-depth-2'])
-      for channel in channels_list:
-        link = channel.find('a')
-        link_title = link.getText().strip()
-        add_directory_menu({"action": "scrape_livehere_links", "title": link_title, "link": link.get('href')}, 'false', True)
+    channels_list = channels_col.find_all('a')
+    for link in channels_list:
+      link_title = re.sub(r'in\sdiretta\sstreaming', '', link.getText(), re.I).strip()
+      add_directory_menu({"action": "scrape_livehere_links", "title": link_title, "link": link.get('href')}, 'false', True)
 
   xbmcplugin.addSortMethod(_handle, xbmcplugin.SORT_METHOD_NONE)
   xbmcplugin.endOfDirectory(_handle)
@@ -70,7 +64,7 @@ def add_links_rec(url_in, loop):
     for iframe_in in iframes_in:
       try:
         link_strip = iframe_in.get('src')
-        if "mailocal2.xyz" in link_strip or "easysite.one" in link_strip or "open-live.org" in link_strip:
+        if "mailocal.xyz" in link_strip or "mailocal2.xyz" in link_strip or "easysite.one" in link_strip or "open-live.org" in link_strip:
           add_links_rec(link_strip, loop + 1)
         else:
           add_directory_menu({"action": "play_streamlink", "title": "iframe " + link_strip, "link": link_strip}, 'true', False)
