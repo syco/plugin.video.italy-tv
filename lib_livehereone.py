@@ -95,6 +95,11 @@ def add_links_rec(url_in, loop):
       if j_channel and j_g:
         add_directory_menu({"action": "play_janjua", "title": "janjua " + j_channel, "link0": j_channel, "link1": j_g}, 'true', False)
 
+    wigiids = re.findall(r'\/\/wigistream\.to\/embed\/\w+', html_in)
+    for wigiid in wigiids:
+      wigiid_in = wigiid.split('/')[4]
+      add_directory_menu({"action": "play_wigistream", "title": "wigistream " + wigiid_in, "link": url_in, "wigiid": wigiid_in}, 'true', False)
+
 def list_links(params):
   from addon import _handle
 

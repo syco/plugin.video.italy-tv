@@ -31,7 +31,7 @@ def list_channels(sportlive_pass):
     link_title = re.sub(r'<[^>]+>', '', ch_in).strip()
     link_id = re.search(r'\(([0-9]+)\)', ch_in).group(1)
 
-    add_directory_menu({"action": "play_wigistream", "title": link_title, "link": "https://starlive.xyz/embed.php?id=live{0}m".format(link_id)}, 'true', False)
+    add_directory_menu({"action": "play_wigistream", "title": link_title, "link": "https://starlive.xyz/embed.php?id=live{0}m".format(link_id), "wigiid": None}, 'true', False)
 
   xbmcplugin.addSortMethod(_handle, xbmcplugin.SORT_METHOD_NONE)
   xbmcplugin.endOfDirectory(_handle)
