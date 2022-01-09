@@ -15,6 +15,7 @@ import fn_janjua as janjua
 import fn_wigistream as wigistream
 
 import lib_livehereone as livehereone
+import lib_webtvhd as webtvhd
 import lib_sportlive as sportlive
 
 addon = xbmcaddon.Addon()
@@ -75,6 +76,7 @@ def print_main_menu():
   xbmcplugin.setContent(_handle, 'videos')
 
   add_directory_menu({"action": "scrape_livehereone_channels", "title": "LiveHereOne"}, 'false', True)
+  add_directory_menu({"action": "scrape_webtvhd_channels", "title": "WebTvHD"}, 'false', True)
 
   if (sportlive_enabled):
     add_directory_menu({"action": "scrape_sportlive_channels", "title": "SportLive"}, 'false', True)
@@ -108,6 +110,10 @@ def router(paramstring):
       livehereone.list_channels()
     elif params['action'][0] == 'scrape_livehereone_links':
       livehereone.list_links(params)
+    elif params['action'][0] == 'scrape_webtvhd_channels':
+      webtvhd.list_channels()
+    elif params['action'][0] == 'scrape_webtvhd_links':
+      webtvhd.list_links(params)
     elif params['action'][0] == 'scrape_sportlive_channels':
       sportlive.list_channels(sportlive_pass)
     else:
