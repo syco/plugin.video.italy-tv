@@ -74,7 +74,7 @@ def print_main_menu():
   xbmcplugin.setPluginCategory(_handle, 'Italy TV')
   xbmcplugin.setContent(_handle, 'videos')
 
-  add_directory_menu({"action": "scrape_livehere_channels", "title": "LiveHereOne"}, 'false', True)
+  add_directory_menu({"action": "scrape_livehereone_channels", "title": "LiveHereOne"}, 'false', True)
 
   if (sportlive_enabled):
     add_directory_menu({"action": "scrape_sportlive_channels", "title": "SportLive"}, 'false', True)
@@ -104,9 +104,9 @@ def router(paramstring):
       play_janjua(params)
     elif params['action'][0] == 'play_wigistream':
       play_wigistream(params)
-    elif params['action'][0] == 'scrape_livehere_channels':
+    elif params['action'][0] == 'scrape_livehereone_channels':
       livehereone.list_channels()
-    elif params['action'][0] == 'scrape_livehere_links':
+    elif params['action'][0] == 'scrape_livehereone_links':
       livehereone.list_links(params)
     elif params['action'][0] == 'scrape_sportlive_channels':
       sportlive.list_channels(sportlive_pass)

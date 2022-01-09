@@ -36,7 +36,7 @@ def list_channels():
     channels_list = channels_col.find_all('a')
     for link in channels_list:
       link_title = re.sub(r'in\sdiretta\sstreaming', '', link.getText(), re.I).strip()
-      add_directory_menu({"action": "scrape_livehere_links", "title": link_title, "link": link.get('href')}, 'false', True)
+      add_directory_menu({"action": "scrape_livehereone_links", "title": link_title, "link": link.get('href')}, 'false', True)
 
   xbmcplugin.addSortMethod(_handle, xbmcplugin.SORT_METHOD_NONE)
   xbmcplugin.endOfDirectory(_handle)
