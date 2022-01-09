@@ -5,7 +5,7 @@ import urllib
 
 FFUA = 'Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0'
 
-def extract_link(link0, wigiid):
+def extract_link(link0, wigiid=None):
   if (not wigiid):
     doc0 = requests.get(link0, headers={'User-Agent': FFUA}).text
     wigiid_re = re.search(r'\/\/wigistream\.to\/embed\/\w+', doc0)

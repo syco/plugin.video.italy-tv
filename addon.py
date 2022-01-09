@@ -55,14 +55,17 @@ def play_streamlink(params):
 
 def play_janjua(params):
   stream = janjua.extract_link(params['link0'][0], params['link1'][0])
-  xbmc.log("{0}".format(stream), xbmc.LOGINFO)
+  xbmc.log("Final janjua url: {0}".format(stream), xbmc.LOGINFO)
   if stream:
     xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=stream))
 
 
 def play_wigistream(params):
-  stream = wigistream.extract_link(params['link'][0], params['wigiid'][0])
-  xbmc.log("{0}".format(stream), xbmc.LOGINFO)
+  if 'wigiid' in params:
+    stream = wigistream.extract_link(params['link'][0], params['wigiid'][0])
+  else:
+    stream = wigistream.extract_link(params['link'][0])
+  xbmc.log("Final wigistream url: {0}".format(stream), xbmc.LOGINFO)
   if stream:
     xbmcplugin.setResolvedUrl(_handle, True, listitem=xbmcgui.ListItem(path=stream))
 

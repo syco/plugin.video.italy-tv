@@ -3,7 +3,7 @@ import xbmcgui
 import xbmcplugin
 import re
 import requests
-import urllib
+from bs4 import BeautifulSoup
 
 FFUA = 'Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0'
 
@@ -24,14 +24,20 @@ def list_channels(sportlive_pass):
   xbmcplugin.setContent(_handle, 'videos')
 
   html_doc = requests.get("https://sportlivefree.xyz/{0}.php".format(sportlive_pass), headers=headers).text
+  html_doc = html_doc.replace('<tr class="">', '</td></tr><tr class="">')
   #xbmc.log(html_doc, xbmc.LOGINFO)
+  soup = BeautifulSoup(html_doc, 'html.parser')
 
-  chs_in = re.findall(r'\n.*?<sup>\s\([0-9]+\)<\/sup>', html_doc)
-  for ch_in in chs_in:
-    link_title = re.sub(r'<[^>]+>', '', ch_in).strip()
-    link_id = re.search(r'\(([0-9]+)\)', ch_in).group(1)
+  seriea = soup.find('div', id='seriea')
+  if seriea:
+    cols = seriea.find_all('td');
 
-    add_directory_menu({"action": "play_wigistream", "title": link_title, "link": "https://starlive.xyz/embed.php?id=live{0}m".format(link_id), "wigiid": None}, 'true', False)
+    for col in cols:
+      link_title = col.get_text().strip()
+      link_id_re = re.search(r'\(([0-9]+)\)', link_title)
+      if link_id_re:
+        link_id = link_id_re.group(1)
+        add_directory_menu({"action": "play_wigistream", "title": link_title, "link": "https://starlive.xyz/embed.php?id=live{0}m".format(link_id)}, 'true', False)
 
   xbmcplugin.addSortMethod(_handle, xbmcplugin.SORT_METHOD_NONE)
   xbmcplugin.endOfDirectory(_handle)
